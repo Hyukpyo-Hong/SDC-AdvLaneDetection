@@ -1,3 +1,4 @@
+
 **Advanced Lane Finding Project**
 
 The goals/steps of this project are the following:
@@ -22,17 +23,13 @@ The goals/steps of this project are the following:
 [video1]: ./project_video_lane.mp4 "Video"
 
 ## [Rubric](https://review.udacity.com/#!/rubrics/571/view) Points
-###Here I will consider the rubric points individually and describe how I addressed each point in my implementation.  
+### Here I will consider the rubric points individually and describe how I addressed each point in my implementation.  
 
 ---
-###Writeup / README
 
-####1. Provide a Writeup / README that includes all the rubric points and how you addressed each one.  You can submit your writeup as markdown or pdf.  [Here](https://github.com/udacity/CarND-Advanced-Lane-Lines/blob/master/writeup_template.md) is a template writeup for this project you can use as a guide and a starting point.
+### Camera Calibration
 
-You're reading it!
-###Camera Calibration
-
-####1. Briefly state how you computed the camera matrix and distortion coefficients. Provide an example of a distortion corrected calibration image.
+#### 1. Briefly state how you computed the camera matrix and distortion coefficients. Provide an example of a distortion corrected calibration image.
 
 The code for this step is contained in the first code cell of the IPython notebook located in `calibration` and `undistort` methods of "./P4_Answer.ipynb".
 
@@ -42,17 +39,17 @@ I then used the output `objpoints` and `imgpoints` to compute the camera calibra
 
 ![alt text][image1]
 
-###Pipeline (single images)
+### Pipeline (single images)
 
-####1. Provide an example of a distortion-corrected image.
+#### 1. Provide an example of a distortion-corrected image.
 To demonstrate this step, I will describe how I apply the distortion correction to one of the test images like this one:
 ![alt text][image2]
-####2. Describe how (and identify where in your code) you used color transforms, gradients or other methods to create a thresholded binary image.  Provide an example of a binary image result.
+#### 2. Describe how (and identify where in your code) you used color transforms, gradients or other methods to create a thresholded binary image.  Provide an example of a binary image result.
 I used a combination of color and gradient thresholds to generate a binary image with `binary()' function. Here's an example of my output for this step.  (note: this is not actually from one of the test images)
 
 ![alt text][image3]
 
-####3. Describe how (and identify where in your code) you performed a perspective transform and provide an example of a transformed image.
+#### 3. Describe how (and identify where in your code) you performed a perspective transform and provide an example of a transformed image.
 
 The code for my perspective transform includes a function called `transform()`, which appears in  in the code cell of the IPython notebook.  The `transform()` function takes as inputs an image (`img`), and uses source (`src`) and destination (`dst`) points.  I chose the hardcode the source and destination points in the following manner:
 
@@ -80,18 +77,18 @@ I verified that my perspective transform was working as expected by drawing the 
 
 ![alt text][image4]
 
-####4. Describe how (and identify where in your code) you identified lane-line pixels and fit their positions with a polynomial?
+#### 4. Describe how (and identify where in your code) you identified lane-line pixels and fit their positions with a polynomial?
 
 Then I did some other stuff and fit my lane lines with a 2nd order polynomial kinda like below,
 And this code is implemented in `findLane()` function of notebook file. To make more smooth lane identification, I stored detected x-values and their fit of previous 15 frames, then calculate average values of them. Also, I used `sanityCheck()` function to make sure my detection is correct. If sanity check is failed, then I removed current detected information from the stored array. 
 
 ![alt text][image5]
 
-####5. Describe how (and identify where in your code) you calculated the radius of curvature of the lane and the position of the vehicle with respect to center.
+#### 5. Describe how (and identify where in your code) you calculated the radius of curvature of the lane and the position of the vehicle with respect to center.
 
 I did this in `measure_curvature_offset()` function of notebook file. To compute curvature, I used curvature formula, and to convert pixels to real world plots, I assumed the ratio, 30 meters per 720 pixels on the y-axis, and 3.7 meters per 700 pixel on the x-axis. Then to calculate the position of the vehicle from the center, I subtracted the mean x-values of the bottom of the left and the right lane from the middle point of the x-axis, then multiplied the ratio of the x-axis.
 
-####6. Provide an example image of your result plotted back down onto the road such that the lane area is identified clearly.
+#### 6. Provide an example image of your result plotted back down onto the road such that the lane area is identified clearly.
 
 I implemented this step in lines 258 through 321 in my code in `findLane()` function of my notebook file. Here is an example of my result on a test image:
 
@@ -99,23 +96,23 @@ I implemented this step in lines 258 through 321 in my code in `findLane()` func
 
 ---
 
-###Pipeline (video)
+### Pipeline (video)
 
-####1. Provide a link to your final video output.  Your pipeline should perform reasonably well on the entire project video (wobbly lines are ok but no catastrophic failures that would cause the car to drive off the road!).
+#### 1. Provide a link to your final video output.  Your pipeline should perform reasonably well on the entire project video (wobbly lines are ok but no catastrophic failures that would cause the car to drive off the road!).
 
 Here's a [link to my video result](./project_video_lane.mp4)
 
 ---
 
-###Discussion
+### Discussion
 
-####1. Briefly discuss any problems/issues you faced in your implementation of this project.  Where will your pipeline likely fail?  What could you do to make it more robust?
+#### 1. Briefly discuss any problems/issues you faced in your implementation of this project.  Where will your pipeline likely fail?  What could you do to make it more robust?
 
-####(1). Figuring out optimized values for each threshold
+#### (1). Figuring out optimized values for each threshold
 
 I used jupyter notebook `widgets` from `IPython.html` to make easier to find good values for lane detection. I combined `Sobel operator`, `Magnitude of the Gradient`, `Direction of the Gradient`, and `L channels` of HSL mode. It works great when I applied uniformed images, but not works on challenge video with many obstacles such as the sunshine, sharp curve, shadows and so on. So my `binary()` function is not suited well for these images. If I have more time, I will prepare images of this kind of situation. And I will test with my widget to find good values, or I will find another approach to solve this problem.
 
-####(2). Curvature of straight lane
+#### (2). Curvature of straight lane
 
 On straight lane images, the curvature of the left lane, and right lane shows great difference each other, since the curvature of the straight lane is huge and sensitive to the small difference. So my `sanityCheck()` often check error, when the curvature of left lane is 50,000m, and the right lane is 20,000m, for example. Although both of them indicate almost straight line, their big difference seems like an error to my `sanityCheck()`. So, I decided if one of the lane's curvature is more than 3Km, I ignored their difference. The result is good on my project video, but I'd better think about good sanity check for two lanes similarity.
 
